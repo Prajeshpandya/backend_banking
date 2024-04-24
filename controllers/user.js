@@ -3,24 +3,23 @@ import { User } from "../model/user.js";
 import bcrypt from "bcrypt";
 import ErrorHandler from "../middlewares/error.js";
 import jwt from "jsonwebtoken";
-import {transporter} from "../app.js"
-
+import { transporter } from "../app.js";
+import { validationResult } from "express-validator";
 
 export const register = async (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    const error = new Error("Validation Failed!");
+    // Unprocessable Entity!
+    error.statusCode = 422;
+    error.data = errors.array();
+    throw error;
+  }
+
   try {
-    const {
-      //   deviceid,
-      //   os,
-      //   version,
-      //   manufacturer,
-      //   model,
-      //   name,
-      //   phone,
-      //   address,
-      //   dob,
-      email,
-      password,
-    } = req.body;
+    const { deviceDetails, phoneNo, email, password } = req.body;
 
     let user = await User.findOne({ email });
 
@@ -28,20 +27,41 @@ export const register = async (req, res, next) => {
 
     const hashedpassword = await bcrypt.hash(password, 10);
 
+    if (
+      !deviceDetails.id ||
+      !deviceDetails.os ||
+      !deviceDetails.version ||
+      !deviceDetails.manufacturer ||
+      !deviceDetails.model
+    ) {
+      return next(
+        new ErrorHandler("please provide valid device details!", 400)
+      );
+    }
+
+    const hashedDid = await bcrypt.hash(deviceDetails.id, 10);
+    const hashedDos = await bcrypt.hash(deviceDetails.os, 10);
+    const hashedDversion = await bcrypt.hash(deviceDetails.version, 10);
+    const hashedDmanufacturer = await bcrypt.hash(
+      deviceDetails.manufacturer,
+      10
+    );
+    const hashedDmodel = await bcrypt.hash(deviceDetails.model, 10);
+
     user = await User.create({
-      //   deviceid,
-      //   os,
-      //   version,
-      //   manufacturer,
-      //   model,
-      //   name,
-      //   phone,
-      //   address,
-      //   dob,
+      deviceDetails: {
+        id: hashedDid,
+        os: hashedDos,
+        version: hashedDversion,
+        manufacturer: hashedDmanufacturer,
+        model: hashedDmodel,
+      },
       email,
+      phone: phoneNo,
       password: hashedpassword,
       verified: false,
     }).then((result) => {
+      console.log(result);
       const d = (req.session.myData = result._id);
       sendOtp(result, res, next);
       console.log(d);
@@ -77,7 +97,7 @@ const sendOtp = async ({ _id, email }, res, next) => {
 
     await transporter.sendMail(mailOptions);
 
-    res.json({
+    res.status(250).json({
       status: "PENDING",
       message: "Verification otp email sent",
       data: {

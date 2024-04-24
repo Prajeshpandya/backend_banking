@@ -1,30 +1,10 @@
 import mongoose from "mongoose";
 
 const schema = new mongoose.Schema({
-  // deviceid: {
-  //   type: String,
-  //   required: true,
-  // },
-  // os: {
-  //   type: String,
-  //   required: true,
-  // },
-  // version: {
-  //   type: String,
-  //   required: true,
-  // },
-  // manufacturer: {
-  //   type: String,
-  //   required: true,
-  // },
-  // model: {
-  //   type: String,
-  //   required: true,
-  // },
-  // name: {
-  //   type: String,
-  //   required: true,
-  // },
+  deviceDetails: {
+    type: Object,
+    required: true,
+  },
   email: {
     type: String,
     required: true,
@@ -34,18 +14,31 @@ const schema = new mongoose.Schema({
     required: true,
     select: false,
   },
-  // phone: {
-  //   type: Number,
-  //   required: true,
-  // },
-  // address: {
-  //   type: String,
-  //   required: true,
-  // },
-  // dob: {
-  //   type: Date,
-  //   required: true,
-  // },
+  phone: {
+    type: Number,
+    required: true,
+  },
+
+  name: {
+    type: String,
+    default: null,
+  },
+  address: {
+    type: String,
+    default: null,
+  },
+  dob: {
+    type: Date,
+    default: null,
+  },
+  bank: {
+    type: String,
+    default: null,
+  },
+  transactionPass: {
+    type: String,
+    default: null,
+  },
 
   createdAt: {
     type: Date,
