@@ -1,18 +1,61 @@
-import { OtpVerification } from "../model/otpver.js";
-import { User } from "../model/user.js";
+import crypto from "crypto";
+
 import bcrypt from "bcrypt";
-import ErrorHandler from "../middlewares/error.js";
 import jwt from "jsonwebtoken";
-import { transporter } from "../app.js";
 import { validationResult } from "express-validator";
 
+import { transporter } from "../app.js";
+import { User } from "../model/user.js";
+import { OtpVerification } from "../model/otpver.js";
+import ErrorHandler from "../middlewares/error.js";
+
+//Genration of keyPairs
+export const generateKeyPairs = (req, res, next) => {
+  const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
+    // key's size
+    modulusLength: 2048,
+    publicKeyEncoding: {
+      type: "spki",
+      format: "der",
+    },
+    privateKeyEncoding: {
+      type: "pkcs8",
+      format: "der",
+    },
+  });
+
+  res.status(201).json({
+    publicKey: publicKey.toString("base64"),
+    privateKey: privateKey.toString("base64"),
+  });
+};
+
+// Verification of sent data with signature
+export const verifySign = (req, res, next) => {
+  let { phoneNo, publicKey, signature } = req.body;
+
+  publicKey = crypto.createPublicKey({
+    key: Buffer.from(publicKey, "base64"),
+    type: "spki",
+    format: "der",
+  });
+
+  const verify = crypto.createVerify("SHA256");
+  verify.update(phoneNo.toString());
+  verify.end();
+
+  let result = verify.verify(publicKey, Buffer.from(signature, "base64"));
+
+  res.status(200).json({ result });
+};
+
+// Register
 export const register = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
     console.log(errors);
     const error = new Error("Validation Failed!");
-    // Unprocessable Entity!
     error.statusCode = 422;
     error.data = errors.array();
     throw error;
@@ -20,6 +63,21 @@ export const register = async (req, res, next) => {
 
   try {
     const { deviceDetails, phoneNo, email, password } = req.body;
+
+    // Signature Generation
+    let { privateKey } = req.body;
+
+    privateKey = crypto.createPrivateKey({
+      key: Buffer.from(privateKey, "base64"),
+      type: "pkcs8",
+      format: "der",
+    });
+
+    console.log(phoneNo.toString());
+    const sign = crypto.createSign("SHA256");
+    sign.update(phoneNo.toString());
+    sign.end();
+    const signature = sign.sign(privateKey).toString("base64");
 
     let user = await User.findOne({ email });
 
@@ -62,9 +120,10 @@ export const register = async (req, res, next) => {
       verified: false,
     }).then((result) => {
       console.log(result);
-      const d = (req.session.myData = result._id);
-      sendOtp(result, res, next);
-      console.log(d);
+      // const d = (req.session.myData = result._id);
+      // console.log(req.session.myData);
+      sendOtp(result, res, next, signature);
+      // console.log(d);
     });
   } catch (error) {
     next(error);
@@ -72,7 +131,7 @@ export const register = async (req, res, next) => {
 };
 
 //send otp verification email
-const sendOtp = async ({ _id, email }, res, next) => {
+const sendOtp = async ({ _id, email }, res, next, signature) => {
   try {
     const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
     const mailOptions = {
@@ -103,6 +162,8 @@ const sendOtp = async ({ _id, email }, res, next) => {
       data: {
         userId: _id,
         email,
+        // signature sent to user
+        signature,
       },
     });
   } catch (error) {
@@ -111,10 +172,18 @@ const sendOtp = async ({ _id, email }, res, next) => {
 };
 
 export const verifyotp = async (req, res, next) => {
-  try {
-    let { otp } = req.body;
+  const errors = validationResult(req);
 
-    const userId = req.session.myData;
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    const error = new Error("Validation Failed!");
+    error.statusCode = 422;
+    error.data = errors.array();
+    throw error;
+  }
+
+  try {
+    let { otp, userId } = req.body;
 
     if (!userId || !otp) {
       return next(new ErrorHandler("Empty otp details are not allowed!", 400));
@@ -166,5 +235,83 @@ export const verifyotp = async (req, res, next) => {
     }
   } catch (error) {
     next(error);
+  }
+};
+
+// Complete Profile
+export const completeProfile = async (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    const error = new Error("Validation Failed!");
+    error.statusCode = 422;
+    error.data = errors.array();
+    throw error;
+  }
+
+  const { userId, name, address, dob, bank, transactionPass } = req.body;
+
+  try {
+    const hashedTP = await bcrypt.hash(transactionPass, 10);
+
+    const user = await User.findOne({ _id: userId });
+    user.name = name;
+    user.address = address;
+    user.dob = dob;
+    user.bank = bank;
+    user.transactionPass = hashedTP;
+    const result = await user.save();
+    res.status(201).json({ message: "Profile complete!", result: result });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+// Login
+export const login = async (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    const error = new Error("Validation Failed!");
+    error.statusCode = 422;
+    error.data = errors.array();
+    throw error;
+  }
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email: email }).select({ password });
+    if (!user) {
+      const error = new Error("User does not exist!");
+      error.statusCode = 401;
+      throw error;
+    }
+
+    if (password !== user.password) {
+      const error = new Error("Incorrect password!");
+      error.statusCode = 401;
+      throw error;
+    }
+
+    const token = jwt.sign(
+      {
+        email: user.email,
+        userId: user._id.toString(),
+      },
+      "somesupersecretsecret",
+      { expiresIn: "1h" }
+    );
+
+    res.status(200).json({ token: token, userId: user._id.toString() });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
   }
 };
