@@ -285,17 +285,14 @@ export const login = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email: email }).select({ password });
-    if (!user) {
-      const error = new Error("User does not exist!");
-      error.statusCode = 401;
-      throw error;
-    }
+    const user = await User.findOne({ email: email });
 
-    if (password !== user.password) {
-      const error = new Error("Incorrect password!");
+    const isEqual = await bcrypt.compare(password, user.password);
+
+    if (!isEqual) {
+      const error = new Error("Incorrect Password!");
       error.statusCode = 401;
-      throw error;
+      return next(error);
     }
 
     const token = jwt.sign(
@@ -307,7 +304,11 @@ export const login = async (req, res, next) => {
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({ token: token, userId: user._id.toString() });
+    res.status(200).json({
+      token: token,
+      userId: user._id.toString(),
+      message: "Login Sucessfully!",
+    });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -315,3 +316,4 @@ export const login = async (req, res, next) => {
     next(err);
   }
 };
+
