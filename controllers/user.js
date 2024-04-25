@@ -58,7 +58,7 @@ export const register = async (req, res, next) => {
     const error = new Error("Validation Failed!");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    return next(error);
   }
 
   try {
@@ -179,7 +179,7 @@ export const verifyotp = async (req, res, next) => {
     const error = new Error("Validation Failed!");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    return next(error);
   }
 
   try {
@@ -247,7 +247,7 @@ export const completeProfile = async (req, res, next) => {
     const error = new Error("Validation Failed!");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    return next(error);
   }
 
   const { userId, name, address, dob, bank, transactionPass } = req.body;
@@ -280,7 +280,7 @@ export const login = async (req, res, next) => {
     const error = new Error("Validation Failed!");
     error.statusCode = 422;
     error.data = errors.array();
-    throw error;
+    return next(error);
   }
   const { email, password } = req.body;
 
@@ -316,4 +316,3 @@ export const login = async (req, res, next) => {
     next(err);
   }
 };
-
