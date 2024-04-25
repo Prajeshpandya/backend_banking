@@ -74,6 +74,25 @@ router.put(
   completeProfile
 );
 
-router.post("/login", login);
+router.post(
+  "/login",
+  [
+    body("email")
+      .isEmail()
+      .withMessage("Please enter a valid email!")
+      .custom((value, { req }) => {
+        return User.findOne({ email: value }).then((userDoc) => {
+          if (userDoc) {
+            return Promise.reject("User already exists!");
+          }
+        });
+      })
+      .normalizeEmail(),
+    body("password", "Password must be 8 characters long!")
+      .trim()
+      .isLength({ min: 8 }),
+  ],
+  login
+);
 
 export default router;
