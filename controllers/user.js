@@ -346,3 +346,26 @@ export const getProfileDetails = (req, res, next) => {
       next(err);
     });
 };
+
+// Using email
+export const getProfileDetailsUsingEmail = (req, res, next) => {
+  const email = req.params.email;
+
+  User.findOne({ email: email })
+    .then((user) => {
+      if (!user) {
+        const error = new Error("User does not exits!");
+        error.status = 404;
+        return next(error);
+      }
+
+      res.status(200).json({ message: "User details fetched!", user: user });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        // Server side error
+        err.statusCode = 500;
+      }
+      next(err);
+    });
+};

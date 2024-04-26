@@ -10,6 +10,7 @@ import {
   login,
   completeProfile,
   getProfileDetails,
+  getProfileDetailsUsingEmail,
 } from "../controllers/user.js";
 import { User } from "../model/user.js";
 
@@ -99,4 +100,5 @@ router.post(
 );
 
 router.get("/getProfileDetails/:userId", isAuth, getProfileDetails);
+router.get("/getProfileDetailsUsingEmail/:email", getProfileDetailsUsingEmail);
 export default router;
