@@ -238,48 +238,13 @@ export const verifyotp = async (req, res, next) => {
   }
 };
 
-// Complete Profile
-export const completeProfile = async (req, res, next) => {
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    console.log(errors);
-    const error = new Error("Validation Failed!");
-    error.statusCode = 422;
-    error.data = errors.array();
-    return next(error);
-  }
-
-  const { userId, name, address, dob, bank, upipin } = req.body;
-
-  console.log(req.file) 
-
-  try {
-    const hashedUPI = await bcrypt.hash(upipin, 10);
-
-    const user = await User.findOne({ _id: userId });
-    user.name = name;
-    user.address = address;
-    user.dob = dob;
-    user.bank = bank;
-    user.upipin = hashedUPI;
-    const result = await user.save();
-    res.status(201).json({ message: "Profile complete!", result: result });
-  } catch (err) {
-    if (!err.statusCode) {
-      err.statusCode = 500;
-    }
-    next(err);
-  }
-};
-
 // Login
 export const login = async (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
     console.log(errors);
-    const error = new Error( errors.errors[0].msg);
+    const error = new Error(errors.errors[0].msg);
     error.statusCode = 422;
     error.data = errors.array();
     return next(error);
@@ -317,4 +282,67 @@ export const login = async (req, res, next) => {
     }
     next(err);
   }
+};
+
+// Complete Profile
+export const completeProfile = async (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    console.log(errors);
+    const error = new Error("Validation Failed!");
+    error.statusCode = 422;
+    error.data = errors.array();
+    return next(error);
+  }
+
+  if (!req.file) {
+    const error = new Error("No image provided.");
+    error.statusCode = 422;
+    return next(error);
+  }
+
+  const { userId, name, address, dob, bank, upipin } = req.body;
+  const imageUrl = req.file.path.replace("\\", "/");
+
+  try {
+    const hashedUPI = await bcrypt.hash(upipin, 10);
+
+    const user = await User.findOne({ _id: userId });
+    user.name = name;
+    user.address = address;
+    user.dob = dob;
+    user.bank = bank;
+    user.upipin = hashedUPI;
+    user.image = imageUrl;
+    const result = await user.save();
+    res.status(201).json({ message: "Profile complete!", result: result });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+export const getProfileDetails = (req, res, next) => {
+  const userId = req.params.userId;
+
+  User.findOne({ _id: userId })
+    .then((user) => {
+      if (!user) {
+        const error = new Error("User does not exits!");
+        error.status = 404;
+        return next(error);
+      }
+
+      res.status(200).json({ message: "User details fetched!", user: user });
+    })
+    .catch((err) => {
+      if (!err.statusCode) {
+        // Server side error
+        err.statusCode = 500;
+      }
+      next(err);
+    });
 };

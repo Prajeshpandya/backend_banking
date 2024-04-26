@@ -1,13 +1,15 @@
 import { body } from "express-validator";
 import express from "express";
+import { isAuth } from "../middlewares/is-auth.js";
 
 import {
   register,
   verifyotp,
   generateKeyPairs,
   verifySign,
-  completeProfile,
   login,
+  completeProfile,
+  getProfileDetails,
 } from "../controllers/user.js";
 import { User } from "../model/user.js";
 
@@ -51,29 +53,6 @@ router.put(
 
 router.post("/verifyotp", [body("otp").not().isEmpty().isNumeric()], verifyotp);
 
-router.put(
-  "/completeProfie",
-  [
-    body("userId").custom((value, { req }) => {
-      return User.findOne({ _id: value }).then((userDoc) => {
-        if (!userDoc) {
-          return Promise.reject("User does not exists!");
-        }
-      });
-    }),
-    body("name").isLength({ min: 5 }).withMessage("Please enter your name!"),
-    body("address")
-      .isLength({ min: 10 })
-      .withMessage("Address must not be empty"),
-    body("dob").isDate().withMessage("please enter valid birth date"),
-    body("bank").isLength({ min: 3 }).withMessage("Please choose a bank"),
-    body("upipin", "Upi Pin must be 6 characters long")
-      .trim()
-      .isLength({ min: 6, max: 6 }),
-  ],
-  completeProfile
-);
-
 router.post(
   "/login",
   [
@@ -95,4 +74,29 @@ router.post(
   login
 );
 
+router.post(
+  "/completeProfile",
+  isAuth,
+  [
+    body("userId").custom((value, { req }) => {
+      return User.findOne({ _id: value }).then((userDoc) => {
+        if (!userDoc) {
+          return Promise.reject("User does not exists!");
+        }
+      });
+    }),
+    body("name").isLength({ min: 5 }).withMessage("Please enter your name!"),
+    body("address")
+      .isLength({ min: 10 })
+      .withMessage("Address must not be empty"),
+    body("dob").isDate().withMessage("please enter valid birth date"),
+    // body("bank").not().isEmpty().withMessage("Please choose a bank"),
+    body("upipin", "Upi Pin must be 6 characters long")
+      .trim()
+      .isLength({ min: 6, max: 6 }),
+  ],
+  completeProfile
+);
+
+router.get("/getProfileDetails/:userId", isAuth, getProfileDetails);
 export default router;
