@@ -67,9 +67,9 @@ router.put(
       .withMessage("Address must not be empty"),
     body("dob").isDate().withMessage("please enter valid birth date"),
     body("bank").isLength({ min: 3 }).withMessage("Please choose a bank"),
-    body("transactionPass", "Password must be 8 characters long")
+    body("upipin", "Upi Pin must be 6 characters long")
       .trim()
-      .isLength({ min: 8 }),
+      .isLength({ min: 6, max: 6 }),
   ],
   completeProfile
 );

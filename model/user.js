@@ -5,6 +5,10 @@ const schema = new mongoose.Schema({
     type: Object,
     required: true,
   },
+  image:{
+    type:String,
+    default:null,
+  },
   email: {
     type: String,
     required: true,
@@ -34,7 +38,7 @@ const schema = new mongoose.Schema({
     type: String,
     default: null,
   },
-  transactionPass: {
+  upipin: {
     type: String,
     default: null,
   },

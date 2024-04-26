@@ -250,17 +250,19 @@ export const completeProfile = async (req, res, next) => {
     return next(error);
   }
 
-  const { userId, name, address, dob, bank, transactionPass } = req.body;
+  const { userId, name, address, dob, bank, upipin } = req.body;
+
+  console.log(req.file) 
 
   try {
-    const hashedTP = await bcrypt.hash(transactionPass, 10);
+    const hashedUPI = await bcrypt.hash(upipin, 10);
 
     const user = await User.findOne({ _id: userId });
     user.name = name;
     user.address = address;
     user.dob = dob;
     user.bank = bank;
-    user.transactionPass = hashedTP;
+    user.upipin = hashedUPI;
     const result = await user.save();
     res.status(201).json({ message: "Profile complete!", result: result });
   } catch (err) {
@@ -277,7 +279,7 @@ export const login = async (req, res, next) => {
 
   if (!errors.isEmpty()) {
     console.log(errors);
-    const error = new Error("Validation Failed!");
+    const error = new Error( errors.errors[0].msg);
     error.statusCode = 422;
     error.data = errors.array();
     return next(error);
