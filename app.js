@@ -2,28 +2,29 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import userRouter from "./routes/user.js";
 import { errorMiddleWare } from "./middlewares/error.js";
-// import cors from "cors";
+import cors from "cors";
 import session from "express-session";
 import { config } from "dotenv";
 import nodemailer from "nodemailer";
 import multer from "multer";
-
+import uuidv4 from "uuidv4";
 import path from "path";
-import { dirname } from "path";
-import bodyParser from "body-parser";
+import { dirname } from 'path';
 import { fileURLToPath } from "url";
-import { uuid } from "uuidv4";
+
 
 export const app = express();
 
 //use middleWare for getData from postman!  // this use before the make router..
+app.use(express.json());
+app.use(cookieParser());
 
-const fileStorage = multer.diskStorage({
-  destination: (req, res, cb) => {
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
     cb(null, "images");
   },
-  filename: (req, file, cb) => {
-    cb(null, uuid());
+  filename: function (req, file, cb) {
+    cb(null, uuidv4());
   },
 });
 
@@ -38,40 +39,24 @@ const fileFilter = (req, file, cb) => {
     cb(null, false);
   }
 };
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-app.use(bodyParser.json());
-app.use(
-  multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
-);
-
+app.use(multer({ storage: storage, fileFilter: fileFilter }).single("image"));
 app.use("/images", express.static(path.join(__dirname, "images")));
 
-app.use(cookieParser());
 config({
   path: "./data/config.env",
 });
 
 //for deployment
-// app.use(
-//   cors({
-//     origin: process.env.FRONTEND_URL || "*", //we can give specific domain , that only take accept the request from that specific domain
-//     methods: ["GET", "PUT", "DELETE", "POST"],
-//     credentials: true, //for get header details like cookie...
-//   })
-// );
-
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "*", //we can give specific domain , that only take accept the request from that specific domain
+    methods: ["GET", "PUT", "DELETE", "POST"],
+    credentials: true, //for get header details like cookie...
+  })
+);
 
 // Set up express-session middleware
 app.use(
