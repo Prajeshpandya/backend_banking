@@ -7,8 +7,12 @@ import session from "express-session";
 import { config } from "dotenv";
 import nodemailer from "nodemailer";
 import multer from "multer";
-import  uuidv4  from "uuidv4";
-import path from "express"
+import uuidv4 from "uuidv4";
+import path from "path";
+import { dirname } from 'path';
+import { fileURLToPath } from "url";
+
+
 export const app = express();
 
 //use middleWare for getData from postman!  // this use before the make router..
@@ -16,25 +20,28 @@ app.use(express.json());
 app.use(cookieParser());
 
 const storage = multer.diskStorage({
-  destination:function(req,file,cb){
-    cb(null,"images");
+  destination: function (req, file, cb) {
+    cb(null, "images");
   },
-  filename:function(req,file,cb){
-    cb(null,uuidv4())
-  }
-})
+  filename: function (req, file, cb) {
+    cb(null, uuidv4());
+  },
+});
 
-const fileFilter = (req,file,cb) => {
-if(
-  file.mimetype === "image/png" ||
-  file.mimetype === "image/jpg" ||
-  file.mimetype === "image/jpeg" 
- ) {
-  cb(null,true);
-}else{
-  cb(null,false)
-}
-}
+const fileFilter = (req, file, cb) => {
+  if (
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg" ||
+    file.mimetype === "image/jpeg"
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 app.use(multer({ storage: storage, fileFilter: fileFilter }).single("image"));
 app.use("/images", express.static(path.join(__dirname, "images")));
 
