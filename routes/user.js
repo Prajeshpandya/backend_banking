@@ -41,6 +41,13 @@ router.put(
       })
       .normalizeEmail(),
     body("phoneNo", "Please provide valid mobile number!")
+      .custom((value, { req }) => {
+        return User.findOne({ phone: value }).then((userDoc) => {
+          if (userDoc) {
+            return Promise.reject("Phone no already exists!");
+          }
+        });
+      })
       .isNumeric()
       .not()
       .isEmpty()

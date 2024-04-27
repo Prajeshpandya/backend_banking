@@ -7,12 +7,12 @@ import session from "express-session";
 import { config } from "dotenv";
 import nodemailer from "nodemailer";
 import multer from "multer";
-import uuidv4 from "uuidv4";
+import { uuid } from "uuidv4";
 import path from "path";
-import { dirname } from 'path';
+import { dirname } from "path";
 import { fileURLToPath } from "url";
-import {router as adminRouter} from "./routes/admin.js"
-
+import { router as adminRouter } from "./routes/admin.js";
+import transactionRoutes from "./routes/transaction.js";
 
 export const app = express();
 
@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
     cb(null, "images");
   },
   filename: function (req, file, cb) {
-    cb(null, uuidv4());
+    cb(null, uuid());
   },
 });
 
@@ -71,6 +71,7 @@ app.use(
 //made prefix route so now we not have to write again and again same path for user/...
 app.use("/users", userRouter);
 app.use("/admin", adminRouter);
+app.use("/transaction", transactionRoutes);
 
 export const transporter = nodemailer.createTransport({
   service: "Gmail",

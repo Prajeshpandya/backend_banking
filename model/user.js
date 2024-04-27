@@ -5,9 +5,9 @@ const schema = new mongoose.Schema({
     type: Object,
     required: true,
   },
-  image:{
-    type:String,
-    default:null,
+  image: {
+    type: String,
+    default: null,
   },
   email: {
     type: String,
@@ -41,6 +41,11 @@ const schema = new mongoose.Schema({
   upipin: {
     type: String,
     default: null,
+  },
+
+  wallet: {
+    type: Number,
+    default: 0,
   },
 
   createdAt: {
