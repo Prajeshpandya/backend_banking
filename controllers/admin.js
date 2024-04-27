@@ -2,7 +2,6 @@ import ErrorHandler from "../middlewares/error.js";
 import { Adminmodal } from "../model/admin.js";
 import { User } from "../model/user.js";
 import { sendCookie } from "../utils/features.js";
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export const signIn = async (req, res, next) => {
@@ -83,7 +82,7 @@ export const deleteuser = async (req, res, next) => {
     // console.log(token);
     // const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(_id);
+    const user = await User.findOne(_id);
     if (!user) return next(new ErrorHandler("user does not exist", 400));
 
     await user.deleteOne();
