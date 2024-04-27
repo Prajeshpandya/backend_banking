@@ -11,6 +11,7 @@ import uuidv4 from "uuidv4";
 import path from "path";
 import { dirname } from 'path';
 import { fileURLToPath } from "url";
+import {router as adminRouter} from "./routes/admin.js"
 
 
 export const app = express();
@@ -69,6 +70,7 @@ app.use(
 
 //made prefix route so now we not have to write again and again same path for user/...
 app.use("/users", userRouter);
+app.use("/admin", adminRouter);
 
 export const transporter = nodemailer.createTransport({
   service: "Gmail",
