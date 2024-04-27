@@ -1,8 +1,10 @@
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import express from "express";
 import { isAuth } from "../middlewares/is-auth.js";
 import {
   generateSignature,
+  getTransactionDetailsReceive,
+  getTransactionDetailsSent,
   makeTranscationUsingAccNo,
   makeTranscationUsingPhoneNo,
 } from "../controllers/transaction.js";
@@ -52,6 +54,36 @@ router.put(
     body("amount").not().isEmpty(),
   ],
   makeTranscationUsingPhoneNo
+);
+
+router.get(
+  "/getHistorySent/:userId",
+  isAuth,
+  [
+    param("userId").custom((value, { req }) => {
+      return User.findById(value).then((userDoc) => {
+        if (!userDoc) {
+          return Promise.reject("User does not exists!");
+        }
+      });
+    }),
+  ],
+  getTransactionDetailsSent
+);
+
+router.get(
+  "/getHistoryReceive/:userId",
+  isAuth,
+  [
+    param("userId").custom((value, { req }) => {
+      return User.findById(value).then((userDoc) => {
+        if (!userDoc) {
+          return Promise.reject("User does not exists!");
+        }
+      });
+    }),
+  ],
+  getTransactionDetailsReceive
 );
 
 export default router;

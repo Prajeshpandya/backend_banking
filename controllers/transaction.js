@@ -262,3 +262,28 @@ export const makeTranscationUsingPhoneNo = async (req, res, next) => {
       next(err);
     });
 };
+
+// Get sent Transaction
+export const getTransactionDetailsSent = async (req, res, next) => {
+  const userId = req.params.userId;
+
+  const transcations = await Transaction.find({ senderId: userId })
+    .populate("senderId")
+    .populate("receiverId");
+
+  res
+    .status(200)
+    .json({ message: "Transactions Fetched!", transcations: transcations });
+};
+
+// Get receive Transaction
+export const getTransactionDetailsReceive = async (req, res, next) => {
+  const userId = req.params.userId;
+  const transcations = await Transaction.find({ receiverId: userId })
+    .populate("senderId")
+    .populate("receiverId");
+
+  res
+    .status(200)
+    .json({ message: "Transactions Fetched!", transcations: transcations });
+};
