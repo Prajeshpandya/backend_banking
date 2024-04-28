@@ -1,5 +1,6 @@
 import ErrorHandler from "../middlewares/error.js";
 import { Adminmodal } from "../model/admin.js";
+import { Transaction } from "../model/transaction.js";
 import { User } from "../model/user.js";
 import { sendCookie } from "../utils/features.js";
 import jwt from "jsonwebtoken";
@@ -39,12 +40,7 @@ export const logOut = async (req, res, next) => {
 export const allusers = async (req, res, next) => {
   try {
     const users = await User.find().lean();
-    // const responseData = users.map((data) => {
-    //   return {
-    //     ...users,
-    //     // imageUrl: `${data.image}`, // Assuming you have a field named 'imageFileName' in your model
-    //   };
-    // });
+
     res.status(200).json({
       message: "success",
       users,
@@ -76,13 +72,26 @@ export const getprofile = async (req, res, next) => {
   }
 };
 
+export const getTransaction = async (req, res, next) => {
+  try {
+    const transaction = await Transaction.find().lean();
+
+    res.status(200).json({
+      message: "success",
+      transaction,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const deleteuser = async (req, res, next) => {
   try {
     const { _id } = req.body;
     // console.log(token);
     // const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findOne(_id);
+    const user = await User.findOne({ _id });
     if (!user) return next(new ErrorHandler("user does not exist", 400));
 
     await user.deleteOne();
@@ -92,6 +101,28 @@ export const deleteuser = async (req, res, next) => {
     });
   } catch (error) {
     console.log(error);
+    next(error);
+  }
+};
+
+export const editUser = async (req, res, next) => {
+  try {
+    const { _id, dob, address } = req.body;
+    const imageUrl = req.file.path.replace("\\", "/");
+
+    const user = await User.findOne({ _id });
+    if (!user) return next(new ErrorHandler("user does not exist", 400));
+
+    await User.updateOne(
+      { dob: dob },
+      { address: address },
+      { image: imageUrl }
+    );
+
+    res
+      .status(201)
+      .json({ message: "User Details Updated!", status: "Success" });
+  } catch (error) {
     next(error);
   }
 };
