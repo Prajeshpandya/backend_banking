@@ -105,24 +105,52 @@ export const deleteuser = async (req, res, next) => {
   }
 };
 
-export const editUser = async (req, res, next) => {
+// export const editUser = async (req, res, next) => {
+//   try {
+//     const { _id, dob, address } = req.body;
+//     if(!_id){
+//       return next(new ErrorHandler("User Can't be found", 400));
+//     }
+//     if (!req.file) {
+//       return next(new ErrorHandler("Image is required", 400));
+//     }
+//     const imageUrl = req.file.path.replace("\\", "/");
+
+//     const user = await User.findOne({ _id });
+//     if (!user) return next(new ErrorHandler("user does not exist", 400));
+
+//     await User.updateOne(
+//       { dob: dob },
+//       { address: address },
+//       { image: imageUrl }
+//     );
+
+//     res
+//       .status(201)
+//       .json({ message: "User Details Updated!", status: "Success" });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+export const getuserTransaction = async (req, res, next) => {
   try {
-    const { _id, dob, address } = req.body;
-    const imageUrl = req.file.path.replace("\\", "/");
+    const { id } = req.body;
 
-    const user = await User.findOne({ _id });
-    if (!user) return next(new ErrorHandler("user does not exist", 400));
+    if (!id) return next(new ErrorHandler("user not found!", 404));
 
-    await User.updateOne(
-      { dob: dob },
-      { address: address },
-      { image: imageUrl }
+    const transaction = await Transaction.find(
+      { senderId: id } || { receiverId: id }
     );
 
-    res
-      .status(201)
-      .json({ message: "User Details Updated!", status: "Success" });
+    if (!transaction)
+      return next(new ErrorHandler("Transaction not found", 404));
+
+    res.status(200).json({
+      message: "success",
+      transaction,
+    });
   } catch (error) {
-    next(error);
+    res.status(500).json({ message: error.message });
   }
 };

@@ -13,5 +13,6 @@ export const sendCookie = (admin, res, message, statusCode = 200) => {
     .json({
       success: true,
       message,
+      data:adminId
     });
 };

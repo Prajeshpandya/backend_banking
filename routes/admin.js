@@ -5,8 +5,8 @@ import {
   allusers,
   getprofile,
   deleteuser,
+  getuserTransaction,
   getTransaction,
-  editUser,
 } from "../controllers/admin.js";
 
 import { isAuth } from "../controllers/authadmin.js";
@@ -17,5 +17,6 @@ router.get("/logout", logOut);
 router.get("/allusers", isAuth, allusers);
 router.get("/profile", getprofile);
 router.get("/transaction",isAuth, getTransaction);
-router.patch("/edituser",isAuth, editUser);
+router.post("/usertran",isAuth, getuserTransaction);
+// router.patch("/edituser",isAuth , editUser);
 router.delete("/deleteuser", deleteuser);
