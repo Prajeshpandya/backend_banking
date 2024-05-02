@@ -3,7 +3,7 @@ class ErrorHandler extends Error {
     super(message);
     this.statusCode = statusCode;
   }
-}
+} 
 
 export const errorMiddleWare = (err, req, res, next) => {
   //basically if err.message is pass in controller then show it otherwise general error is below
