@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 
 const schema = new mongoose.Schema({
+  accountNum: {
+    type:String,
+    default: () => Math.floor(Math.random() * 90000000000) + 10000000000, // Generates a random 11-digit number
+  },
   deviceDetails: {
     type: Object,
     required: true,

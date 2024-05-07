@@ -315,6 +315,7 @@ export const completeProfile = async (req, res, next) => {
     user.bank = bank;
     user.upipin = hashedUPI;
     user.image = imageUrl;
+    user.accountNum;
     const result = await user.save();
     res.status(201).json({ message: "Profile complete!", result: result });
   } catch (err) {

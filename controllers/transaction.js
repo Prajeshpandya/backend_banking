@@ -132,14 +132,7 @@ export const makeTranscationUsingAccNo = async (req, res, next) => {
       user.wallet = updatedWallet;
       return user.save();
     })
-    .then(() => {
-      return transporter.sendMail({
-        from: '"XYZBanking" xyzbanking@gmail.com', // sender address
-        to: receiverUser.email, // list of receivers
-        subject: "CREDITED Money to your account in XYZBanking 💵🤑", // Subject line
-        text: `Hello  ${receiverUser.name},your account has been credited by ${amount}₹ from account number ${user._id} , Total available balance is ${receiverUser.wallet}₹.`, // plain text body
-      });
-    })
+    
     .then(() => {
       const transaction = new Transaction();
       transaction.senderId = senderId;
@@ -147,6 +140,13 @@ export const makeTranscationUsingAccNo = async (req, res, next) => {
       transaction.title = title;
       transaction.amount = amount;
       return transaction.save();
+    }).then((result) => {
+      return transporter.sendMail({
+        from: '"XYZBanking" xyzbanking@gmail.com', // sender address
+        to: receiverUser.email, // list of receivers
+        subject: "CREDITED Money to your account in XYZBanking 💵🤑", // Subject line
+        text: `Hello  ${receiverUser.name},your account has been credited by ${amount}₹ from account number ${user._id} , Total available balance is ${receiverUser.wallet}₹, Transaction Id: ${result._id}`, // plain text body
+      });
     })
     .then((result) => {
       res
