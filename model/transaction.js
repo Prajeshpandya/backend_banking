@@ -3,13 +3,13 @@ import mongoose, { Schema } from "mongoose";
 const transactionSchema = new mongoose.Schema(
   {
     senderId: {
-      type: Schema.Types.ObjectId,
+      type: Number,
       ref: "User",
       required: true,
     },
 
     receiverId: {
-      type: Schema.Types.ObjectId,
+      type: Number,
       ref: "User",
       required: true,
     },

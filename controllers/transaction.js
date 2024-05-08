@@ -132,7 +132,7 @@ export const makeTranscationUsingAccNo = async (req, res, next) => {
       user.wallet = updatedWallet;
       return user.save();
     })
-    
+
     .then(() => {
       const transaction = new Transaction();
       transaction.senderId = senderId;
@@ -140,7 +140,8 @@ export const makeTranscationUsingAccNo = async (req, res, next) => {
       transaction.title = title;
       transaction.amount = amount;
       return transaction.save();
-    }).then((result) => {
+    })
+    .then((result) => {
       return transporter.sendMail({
         from: '"XYZBanking" xyzbanking@gmail.com', // sender address
         to: receiverUser.email, // list of receivers
@@ -279,6 +280,7 @@ export const getTransactionDetailsSent = async (req, res, next) => {
 // Get receive Transaction
 export const getTransactionDetailsReceive = async (req, res, next) => {
   const userId = req.params.userId;
+
   const transcations = await Transaction.find({ receiverId: userId })
     .populate("senderId")
     .populate("receiverId");
