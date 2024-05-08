@@ -133,7 +133,7 @@ export const register = async (req, res, next) => {
 //send otp verification email
 const sendOtp = async ({ _id, email }, res, next, signature) => {
   try {
-    const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+    const otp = `${Math.floor(100000 + Math.random() * 900000)}`;
     const mailOptions = {
       from: "banking@gmail.com",
       to: email,
