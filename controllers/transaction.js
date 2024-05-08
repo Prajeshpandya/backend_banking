@@ -5,6 +5,11 @@ import bcrypt from "bcrypt";
 import { decryptData } from "../utils/decrypt.js";
 import nodemailer from "nodemailer";
 import { Transaction } from "../model/transaction.js";
+import { config } from "dotenv";
+
+config({
+  path: "./data/config.env",
+});
 
 // Declare the nodemailer that we are using brevo(speciflying all brevo credentials) as our server to send emails
 let transporter = nodemailer.createTransport({
@@ -12,8 +17,8 @@ let transporter = nodemailer.createTransport({
   port: 587,
   secure: false, // true for 465, false for other ports
   auth: {
-    user: "andhariyavalay4@gmail.com", // generated ethereal user
-    pass: "ADv9QZzN2ban5mTM", // generated ethereal password
+    user: process.env.Brevo_USER, // generated ethereal user
+    pass: process.env.Brevo_PASSWORD, // generated ethereal password
   },
 });
 
