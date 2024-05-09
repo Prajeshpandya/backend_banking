@@ -106,6 +106,9 @@ export const register = async (req, res, next) => {
     );
     const hashedDmodel = await bcrypt.hash(deviceDetails.model, 10);
 
+    // Generating Upi Id
+    const upiId = phoneNo.toString() + "@xyzbanking";
+
     user = await User.create({
       deviceDetails: {
         id: hashedDid,
@@ -116,6 +119,7 @@ export const register = async (req, res, next) => {
       },
       email,
       phone: phoneNo,
+      upiId: upiId,
       password: hashedpassword,
       verified: false,
     }).then((result) => {

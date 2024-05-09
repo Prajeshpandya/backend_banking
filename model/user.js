@@ -25,6 +25,10 @@ const schema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  upiId: {
+    type: String,
+    required: true,
+  },
 
   name: {
     type: String,
