@@ -122,14 +122,6 @@ export const makeTranscationUsingAccNo = async (req, res, next) => {
       return user.save();
     })
     .then(() => {
-      return transporter.sendMail({
-        from: '"XYZBanking" xyzbanking@gmail.com', // sender address
-        to: user.email, // list of receivers
-        subject: "DEBITED Money from XYZBanking 💸", // Subject line
-        text: `Hello  ${user.name},your account has been debited by ${amount}₹ to account number ${acNo} , Total available balance is ${user.wallet}₹.`, // plain text body
-      });
-    })
-    .then(() => {
       return User.findOne({ _id: acNo });
     })
     .then((user) => {
@@ -138,7 +130,6 @@ export const makeTranscationUsingAccNo = async (req, res, next) => {
       user.wallet = updatedWallet;
       return user.save();
     })
-
     .then(() => {
       const transaction = new Transaction();
       transaction.senderId = senderId;
@@ -148,12 +139,22 @@ export const makeTranscationUsingAccNo = async (req, res, next) => {
       return transaction.save();
     })
     .then((result) => {
-      return transporter.sendMail({
+      transporter.sendMail({
+        from: '"XYZBanking" xyzbanking@gmail.com', // sender address
+        to: user.email, // list of receivers
+        subject: "DEBITED Money from XYZBanking 💸", // Subject line
+        text: `Hello  ${user.name},your account has been debited by ${amount}₹ to account number ${acNo} (the transaction id is ${result._id}), Total available balance is ${user.wallet}₹.`, // plain text body
+      });
+      return result;
+    })
+    .then((result) => {
+      transporter.sendMail({
         from: '"XYZBanking" xyzbanking@gmail.com', // sender address
         to: receiverUser.email, // list of receivers
         subject: "CREDITED Money to your account in XYZBanking 💵🤑", // Subject line
-        text: `Hello  ${receiverUser.name},your account has been credited by ${amount}₹ from account number ${user._id} , Total available balance is ${receiverUser.wallet}₹, Transaction Id: ${result._id}`, // plain text body
+        text: `Hello  ${receiverUser.name},your account has been credited by ${amount}₹ from account number ${user._id} (the transaction id is ${result._id}), Total available balance is ${receiverUser.wallet}₹.`, // plain text body
       });
+      return result;
     })
     .then((result) => {
       res
@@ -225,14 +226,6 @@ export const makeTranscationUsingPhoneNo = async (req, res, next) => {
       return user.save();
     })
     .then(() => {
-      return transporter.sendMail({
-        from: '"XYZBanking" xyzbanking@gmail.com', // sender address
-        to: user.email, // list of receivers
-        subject: "DEBITED Money from XYZBanking 💸", // Subject line
-        text: `Hello  ${user.name},your account has been debited by ${amount}₹ to phone number ${phone} , Total available balance is ${user.wallet}₹.`, // plain text body
-      });
-    })
-    .then(() => {
       return User.findOne({ phone: phone });
     })
     .then((user) => {
@@ -242,20 +235,30 @@ export const makeTranscationUsingPhoneNo = async (req, res, next) => {
       return user.save();
     })
     .then(() => {
-      return transporter.sendMail({
-        from: '"XYZBanking" xyzbanking@gmail.com', // sender address
-        to: receiverUser.email, // list of receivers
-        subject: "CREDITED Money to your account in XYZBanking 💵🤑", // Subject line
-        text: `Hello  ${receiverUser.name},your account has been credited by ${amount}₹ from phone  number ${user.phone} , Total available balance is ${receiverUser.wallet}₹.`, // plain text body
-      });
-    })
-    .then(() => {
       const transaction = new Transaction();
       transaction.senderId = senderId;
       transaction.receiverId = receiverUser._id;
       transaction.title = title;
       transaction.amount = amount;
       return transaction.save();
+    })
+    .then((result) => {
+      transporter.sendMail({
+        from: '"XYZBanking" xyzbanking@gmail.com', // sender address
+        to: user.email, // list of receivers
+        subject: "DEBITED Money from XYZBanking 💸", // Subject line
+        text: `Hello  ${user.name},your account has been debited by ${amount}₹ to UPI ID ${receiverUser.upiId} (the transaction id is ${result._id}), Total available balance is ${user.wallet}₹.`, // plain text body
+      });
+      return result;
+    })
+    .then((result) => {
+      transporter.sendMail({
+        from: '"XYZBanking" xyzbanking@gmail.com', // sender address
+        to: receiverUser.email, // list of receivers
+        subject: "CREDITED Money to your account in XYZBanking 💵🤑", // Subject line
+        text: `Hello  ${receiverUser.name},your account has been credited by ${amount}₹ from UPI ID  number ${user.upiId} (the transaction id is ${result._id}), Total available balance is ${receiverUser.wallet}₹.`, // plain text body
+      });
+      return result;
     })
     .then((result) => {
       res
