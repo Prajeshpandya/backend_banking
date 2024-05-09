@@ -64,7 +64,7 @@ export const register = async (req, res, next) => {
   try {
     const { deviceDetails, phoneNo, email, password } = req.body;
 
-    // Signature Generation
+    // Signature Generation using crypto package!
     let { privateKey } = req.body;
 
     privateKey = crypto.createPrivateKey({
@@ -326,6 +326,7 @@ export const completeProfile = async (req, res, next) => {
   }
 };
 
+// Gives user Profile details using user id
 export const getProfileDetails = (req, res, next) => {
   const userId = req.params.userId;
 
@@ -348,7 +349,7 @@ export const getProfileDetails = (req, res, next) => {
     });
 };
 
-// Using email
+// Gives user Profile details using email
 export const getProfileDetailsUsingEmail = (req, res, next) => {
   const email = req.params.email;
 

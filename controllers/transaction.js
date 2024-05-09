@@ -65,6 +65,7 @@ const verifySign = (userId, publicKey, signature) => {
   return result;
 };
 
+// Make transaction using acc no
 export const makeTranscationUsingAccNo = async (req, res, next) => {
   const errors = validationResult(req);
 
