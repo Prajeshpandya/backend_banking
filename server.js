@@ -12,6 +12,7 @@ const port = 5000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// SSL server
 const sslServer = https.createServer(
   {
     key: fs.readFileSync(path.join(__dirname, "cert", "key.pem")),
