@@ -15,7 +15,7 @@ export const router = express.Router();
 router.post("/login", signIn);
 router.get("/logout", logOut);
 router.get("/allusers", isAuth, allusers);
-router.get("/profile", getprofile);
+router.get("/profile",isAuth,getprofile);
 router.get("/transaction",isAuth, getTransaction);
 router.post("/usertran",isAuth, getuserTransaction);
 // router.patch("/edituser",isAuth , editUser);
