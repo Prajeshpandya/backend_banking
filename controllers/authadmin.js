@@ -21,6 +21,5 @@ export const isAuth = async (req, res, next) => {
 
   //   So, yes, you can set values to req.anything. This is commonly done in middleware functions or route handlers to pass data between middleware functions or to make data available to subsequent handlers in the request-response cycle.
   req.admin = await Adminmodal.findById(decoded._id);
-
   next();
 };

@@ -14,7 +14,7 @@ export const signIn = async (req, res, next) => {
 
     // if (!admin) return next(new ErrorHandler("Admin can't find", 400));
 
-    if (email === "admin@gmail.com" && password === "admin.123") {
+    if (email === admin.email && password === admin.password) {
       sendCookie(admin, res, `Welcome Back ${admin.name}`, 200);
     } else {
       return next(new ErrorHandler("Invalid email or password!", 400));
@@ -29,8 +29,8 @@ export const logOut = async (req, res, next) => {
     .status(200)
     .cookie("token", "", {
       httpOnly: "true",
-      sameSite: "lax",
-      secure: false,
+      sameSite: "none",
+      secure: true,
     })
     .json({
       success: true,
@@ -52,20 +52,22 @@ export const allusers = async (req, res, next) => {
 
 export const getprofile = async (req, res, next) => {
   try {
-    const { token } = req.cookies;
+    // const { token } = req.cookies;
 
-    if (!token) {
-      return res.status(404).json({
-        success: "false",
-        message: "Login first!",
-      });
-    }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const admin = await Adminmodal.findById(decoded._id);
+    // if (!token) {
+    //   return res.status(404).json({
+    //     success: "false",
+    //     message: "Login first!",
+    //   });
+    // }
+    // const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // const admin = await Adminmodal.findById(token);
 
     res.status(200).json({
       message: "success",
-      admin: admin,
+      // admin: admin,
+      admin: req.admin,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
