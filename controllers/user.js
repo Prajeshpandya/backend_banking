@@ -123,7 +123,7 @@ export const register = async (req, res, next) => {
       password: hashedpassword,
       verified: false,
     }).then((result) => {
-      console.log(result);
+      // console.log(result);
       // const d = (req.session.myData = result._id);
       // console.log(req.session.myData);
       sendOtp(result, res, next, signature);
@@ -257,7 +257,7 @@ export const login = async (req, res, next) => {
 
   try {
     const user = await User.findOne({ email: email });
-
+if(!user) return next(new ErrorHandler("User Not Found",400))
     const isEqual = await bcrypt.compare(password, user.password);
 
     if (!isEqual) {
